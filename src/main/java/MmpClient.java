@@ -5,10 +5,11 @@ import java.net.*;
 public class MmpClient{
     private DatagramSocket socket;
     private InetAddress address;
-    private byte[] buf;
+    private byte[] buffer;
 
     public MmpClient() throws SocketException {
         socket = new DatagramSocket();
+        buffer = new byte[256];
         try {
             address = InetAddress.getByName("localhost");
         }catch(UnknownHostException e){
@@ -17,14 +18,13 @@ public class MmpClient{
     }
 
     public String sendEcho(String msg) throws IOException {
-        buf = msg.getBytes();
+        this.buffer = msg.getBytes();
         DatagramPacket packet
-                = new DatagramPacket(buf, buf.length, address, 4445);
+                = new DatagramPacket(buffer, buffer.length, address, 4445);
         socket.send(packet);
-        packet = new DatagramPacket(buf, buf.length);
+        packet = new DatagramPacket(buffer, buffer.length);
         socket.receive(packet);
         return new String(packet.getData(), 0, packet.getLength());
-
     }
 
     public void closeSocket() {

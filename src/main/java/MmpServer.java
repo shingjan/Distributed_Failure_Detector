@@ -5,7 +5,7 @@ import java.util.Map;
 
 
 public class MmpServer {
-    public DatagramSocket socket;
+    private DatagramSocket socket;
     private boolean isRunning;
     private byte[] buffer = new byte[256];
     private static String[] membership = {
@@ -21,10 +21,17 @@ public class MmpServer {
             "172.22.158.211"
     };
     private Map<String, NodeStatus> memberList;
+    private String localIP;
+    private int portNum;
+    private NodeStatus nodeStatus;
 
     public MmpServer(int portNum) throws SocketException {
-        this.socket = new DatagramSocket(portNum);
+        this.portNum = portNum;
+        this.socket = new DatagramSocket(this.portNum);
         this.memberList = new HashMap<>();
+        this.localIP = this.findLocalIP();
+        this.nodeStatus = NodeStatus.ALIVE;
+        this.isRunning = true;
     }
 
     public DatagramSocket getSocket() {
@@ -41,12 +48,25 @@ public class MmpServer {
         return packet;
     }
 
-    public void sendPacket(DatagramPacket packet, String msg) throws IOException{
+    public void sendACK(DatagramPacket packet) throws IOException {
+        this.sendPacket(NodeStatus.ACK.name(), packet.getAddress());
+    }
+
+    public void sendPING() throws IOException {
+        for(String member : membership) {
+            this.sendPacket(NodeStatus.PING.name(), InetAddress.getByName(member));
+        }
+    }
+
+    public void sendPacket(String msg, InetAddress address) throws IOException{
         this.buffer = msg.getBytes();
-        InetAddress address = packet.getAddress();
-        int port = packet.getPort();
-        packet = new DatagramPacket(buffer, buffer.length, address, port);
+        DatagramPacket packet
+                = new DatagramPacket(this.buffer, this.buffer.length, address, this.portNum);
         this.socket.send(packet);
+    }
+
+    public void updateMemberList(DatagramPacket packet) {
+        String received = new String(packet.getData(), 0, packet.getLength());
     }
 
     public String findLocalIP(){
@@ -60,13 +80,31 @@ public class MmpServer {
         return ip;
     }
 
+    public void printMemberList(){
+        for (String key : this.memberList.keySet()){
+            String value = this.memberList.get(key).toString();
+            System.out.println(key + ", " + value);
+        }
+    }
+
     public static void main(String[] args){
         try {
             MmpServer mmpServer = new MmpServer(4445);
-            DatagramPacket packet = mmpServer.receivePacket();
-            String received = new String(packet.getData(), 0, packet.getLength());
-            System.out.println(received);
-            mmpServer.sendPacket(packet, "Here is looking at you, kid");
+            //MmpClient mmpClient = new MmpClient();
+            System.out.println("The IP address of this node is " + mmpServer.localIP);
+            while(mmpServer.isRunning) {
+                mmpServer.sendPING();
+                DatagramPacket packet = mmpServer.receivePacket();
+                String received = new String(packet.getData(), 0, packet.getLength());
+                System.out.println(received);
+                if(received.equals(NodeStatus.PING.name())){
+                    mmpServer.sendACK(packet);
+                }else if(received.equals(NodeStatus.ACK.name())){
+                    mmpServer.updateMemberList(packet);
+                }else if(received.equals(NodeStatus.ALIVE.name())){
+
+                }
+            }
         }catch(IOException e){
             e.printStackTrace();
         }
