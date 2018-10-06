@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,9 @@ public class MmpServer {
             "172.22.158.211"
     };
     private Map<String, NodeStatus> memberList;
+    private String introducerIP;
     private String localIP;
+    private String nodeID;
     private int portNum;
     private NodeStatus nodeStatus;
 
@@ -29,17 +31,92 @@ public class MmpServer {
         this.portNum = portNum;
         this.socket = new DatagramSocket(this.portNum);
         this.memberList = new HashMap<>();
+        this.introducerIP = membership[0];
         this.localIP = this.findLocalIP();
         this.nodeStatus = NodeStatus.ALIVE;
+        this.nodeID = this.localIP+" "+System.currentTimeMillis();
         this.isRunning = true;
+    }
+
+    public boolean joinMmp(){
+        Socket introducer = null;
+        try{
+            introducer = new Socket(this.introducerIP, this.portNum);
+        }catch(IOException e){
+            System.out.println("Cannot connect to Introducer. Rejoining not available.");
+            return false;
+        }
+        System.out.println("Introducer Connected. Getting up-to-date mmp list from it...");
+        PrintWriter toIntrocucer = null;
+        BufferedReader fromIntroducer = null;
+        try {
+            fromIntroducer = new BufferedReader(
+                    new InputStreamReader(introducer.getInputStream()));
+            toIntrocucer = new PrintWriter(
+                    new OutputStreamWriter(introducer.getOutputStream()));
+        }catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        System.out.println("Input/Ouput Stream inited");
+        String line = null;
+        try {
+            toIntrocucer.println(this.nodeID);
+            toIntrocucer.flush();
+            while ((line = fromIntroducer.readLine()) != null) {
+                System.out.println(line+"updated from introducer");
+                this.memberList.put(line, NodeStatus.ALIVE);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        System.out.println("Member list updated from introducer!");
+        return true;
+    }
+
+    public void launch(){
+        MmpReceiver mmpReceiver = new MmpReceiver(this.socket);
+        mmpReceiver.setDaemon(true);
+        mmpReceiver.run();
+        System.out.println("Receiver running in background");
+        MmpSender mmpSender = new MmpSender(this.socket);
+        mmpSender.setDaemon(true);
+        mmpSender.run();
+        System.out.println("Sender running in background");
+        //command line
+        while(this.isRunning){
+            try {
+                System.out.println("Available cmds: status, decommission");
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                String command = br.readLine();
+                if(command.equals("status")){
+                    this.printMemberList();
+                }else if(command.equals("decommission")){
+                    this.isRunning = false;
+                }else{
+                    System.out.println("Wrong cmd, try again");
+                }
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        //kill sender and receiver thread
+        mmpReceiver.terminate();
+        mmpSender.terminate();
+        try {
+            mmpReceiver.join();
+            mmpSender.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("sender & receiver terminated.");
+        this.socket.close();
     }
 
     public DatagramSocket getSocket() {
         return this.socket;
-    }
-
-    public void closeSocket(){
-        this.socket.close();
     }
 
     public DatagramPacket receivePacket() throws IOException {
@@ -48,26 +125,6 @@ public class MmpServer {
         return packet;
     }
 
-    public void sendACK(DatagramPacket packet) throws IOException {
-        this.sendPacket(NodeStatus.ACK.name(), packet.getAddress());
-    }
-
-    public void sendPING() throws IOException {
-        for(String member : membership) {
-            this.sendPacket(NodeStatus.PING.name(), InetAddress.getByName(member));
-        }
-    }
-
-    public void sendPacket(String msg, InetAddress address) throws IOException{
-        this.buffer = msg.getBytes();
-        DatagramPacket packet
-                = new DatagramPacket(this.buffer, this.buffer.length, address, this.portNum);
-        this.socket.send(packet);
-    }
-
-    public void updateMemberList(DatagramPacket packet) {
-        String received = new String(packet.getData(), 0, packet.getLength());
-    }
 
     public String findLocalIP(){
         String ip = "";
@@ -91,19 +148,8 @@ public class MmpServer {
         try {
             MmpServer mmpServer = new MmpServer(4445);
             //MmpClient mmpClient = new MmpClient();
-            System.out.println("The IP address of this node is " + mmpServer.localIP);
-            while(mmpServer.isRunning) {
-                mmpServer.sendPING();
-                DatagramPacket packet = mmpServer.receivePacket();
-                String received = new String(packet.getData(), 0, packet.getLength());
-                System.out.println(received);
-                if(received.equals(NodeStatus.PING.name())){
-                    mmpServer.sendACK(packet);
-                }else if(received.equals(NodeStatus.ACK.name())){
-                    mmpServer.updateMemberList(packet);
-                }else if(received.equals(NodeStatus.ALIVE.name())){
-
-                }
+            if(mmpServer.joinMmp()) {
+                mmpServer.launch();
             }
         }catch(IOException e){
             e.printStackTrace();

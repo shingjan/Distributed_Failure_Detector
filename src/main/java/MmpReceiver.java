@@ -22,8 +22,8 @@ public class MmpReceiver extends Thread {
     private Map<String, NodeStatus> memberList;
     private String localIP;
     private int portNum;
-    private NodeStatus nodeStatus;
-    public MmpReceiver(){
+
+    public MmpReceiver(DatagramSocket socket){
 
     }
 
@@ -35,6 +35,12 @@ public class MmpReceiver extends Thread {
 
     @Override
     public void run() {
+        while(this.isRunning){
 
+        }
+    }
+
+    public void terminate(){
+        this.isRunning = false;
     }
 }

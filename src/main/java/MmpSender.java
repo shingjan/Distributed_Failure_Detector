@@ -23,20 +23,17 @@ public class MmpSender extends Thread {
     private Map<String, NodeStatus> memberList;
     private String localIP;
     private int portNum;
-    private NodeStatus nodeStatus;
     public MmpSender(DatagramSocket socket) {
         this.socket = socket;
     }
 
-
-
     public void sendACK(DatagramPacket packet) throws IOException {
-        this.sendPacket(NodeStatus.ACK.name(), packet.getAddress());
+        this.sendPacket(NodeStatus.ACK.name(), packet.getAddress(), packet.getPort());
     }
 
-    public void sendPING() throws IOException {
+    public void sendPING(int portNum) throws IOException {
         for(String member : membership) {
-            this.sendPacket(NodeStatus.PING.name(), InetAddress.getByName(member));
+            this.sendPacket(NodeStatus.PING.name(), InetAddress.getByName(member), portNum);
         }
     }
 
@@ -45,5 +42,14 @@ public class MmpSender extends Thread {
         DatagramPacket packet
                 = new DatagramPacket(buffer, buffer.length, address, portNum);
         this.socket.send(packet);
+    }
+
+    @Override
+    public void run(){
+
+    }
+
+    public void terminate(){
+        this.isRunning = false;
     }
 }
