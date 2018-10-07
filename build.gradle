@@ -36,7 +36,7 @@ task mmpServer(type: JavaExec) {
 }
 
 task mmpClient(type: JavaExec) {
-    main = "MmpClient"
+    main = "MmpIntroducer"
     classpath = sourceSets.main.runtimeClasspath
     //standardInput = System.in
     //jvmArgs = ['-Xms2048m', '-Xmx2048m']

@@ -1,7 +1,8 @@
 public enum NodeStatus {
-    ALIVE,
+    JOINED,
     LEFT,
-    DEAD,
+    FAILED,
     PING,
     ACK
 }
+

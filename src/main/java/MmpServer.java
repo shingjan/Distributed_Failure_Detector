@@ -2,13 +2,14 @@ import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class MmpServer {
-    private DatagramSocket socket;
-    private boolean isRunning;
-    private byte[] buffer = new byte[256];
-    private static String[] membership = {
+    protected DatagramSocket socket;
+    protected boolean isRunning;
+    protected byte[] buffer = new byte[256];
+    protected static String[] membership = {
             "172.22.158.208",
             "172.22.154.209",
             "172.22.156.209",
@@ -20,12 +21,13 @@ public class MmpServer {
             "172.22.156.211",
             "172.22.158.211"
     };
-    private Map<String, NodeStatus> memberList;
-    private String introducerIP;
-    private String localIP;
-    private String nodeID;
-    private int portNum;
-    private NodeStatus nodeStatus;
+    protected Map<String, String> memberList;
+    protected String introducerIP;
+    protected String localIP;
+    protected String nodeID;
+    protected int portNum;
+    protected NodeStatus nodeStatus;
+    protected AtomicBoolean ackReceived = new AtomicBoolean(false);
 
     public MmpServer(int portNum) throws SocketException {
         this.portNum = portNum;
@@ -33,7 +35,7 @@ public class MmpServer {
         this.memberList = new HashMap<>();
         this.introducerIP = membership[0];
         this.localIP = this.findLocalIP();
-        this.nodeStatus = NodeStatus.ALIVE;
+        this.nodeStatus = NodeStatus.JOINED;
         this.nodeID = this.localIP+" "+System.currentTimeMillis();
         this.isRunning = true;
     }
@@ -43,7 +45,7 @@ public class MmpServer {
         try{
             introducer = new Socket(this.introducerIP, this.portNum);
         }catch(IOException e){
-            System.out.println("Cannot connect to Introducer. Rejoining not available.");
+            System.out.println("Cannot connect to Introducer. Joining not available.");
             return false;
         }
         System.out.println("Introducer Connected. Getting up-to-date mmp list from it...");
@@ -65,7 +67,8 @@ public class MmpServer {
             toIntrocucer.flush();
             while ((line = fromIntroducer.readLine()) != null) {
                 System.out.println(line+"updated from introducer");
-                this.memberList.put(line, NodeStatus.ALIVE);
+                String[] tmp = line.split(" ");
+                this.memberList.put(tmp[0], tmp[1]);
             }
         }catch(IOException e){
             e.printStackTrace();
@@ -76,11 +79,13 @@ public class MmpServer {
     }
 
     public void launch(){
-        MmpReceiver mmpReceiver = new MmpReceiver(this.socket);
+        MmpReceiver mmpReceiver = new MmpReceiver(this.socket, this.memberList, this.portNum,
+                this.localIP, this.nodeID, this.ackReceived);
         mmpReceiver.setDaemon(true);
         mmpReceiver.run();
         System.out.println("Receiver running in background");
-        MmpSender mmpSender = new MmpSender(this.socket);
+        MmpSender mmpSender = new MmpSender(this.socket, this.memberList, this.portNum,
+                this.localIP, this.nodeID, this.ackReceived);
         mmpSender.setDaemon(true);
         mmpSender.run();
         System.out.println("Sender running in background");
@@ -93,6 +98,7 @@ public class MmpServer {
                 if(command.equals("status")){
                     this.printMemberList();
                 }else if(command.equals("decommission")){
+                    System.out.println("Decommissioning " + this.localIP);
                     this.isRunning = false;
                 }else{
                     System.out.println("Wrong cmd, try again");
@@ -111,20 +117,9 @@ public class MmpServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("sender & receiver terminated.");
+        System.out.println("sender & receiver terminated. Decommission finished");
         this.socket.close();
     }
-
-    public DatagramSocket getSocket() {
-        return this.socket;
-    }
-
-    public DatagramPacket receivePacket() throws IOException {
-        DatagramPacket packet = new DatagramPacket(this.buffer, this.buffer.length);
-        this.socket.receive(packet);
-        return packet;
-    }
-
 
     public String findLocalIP(){
         String ip = "";
@@ -139,7 +134,7 @@ public class MmpServer {
 
     public void printMemberList(){
         for (String key : this.memberList.keySet()){
-            String value = this.memberList.get(key).toString();
+            String value = this.memberList.get(key);
             System.out.println(key + ", " + value);
         }
     }
