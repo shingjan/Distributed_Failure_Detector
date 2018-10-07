@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MmpServer {
     protected DatagramSocket socket;
     protected boolean isRunning;
-    protected byte[] buffer = new byte[256];
+    protected byte[] buffer;
     protected static String[] membership = {
             "172.22.158.208",
             "172.22.154.209",

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MmpReceiver extends Thread {
     private DatagramSocket socket;
     private boolean isRunning;
-    private byte[] buffer = new byte[256];
+    private byte[] buffer;
     private AtomicBoolean ackReceived;
     private static String[] membership = {
             "172.22.158.208",
