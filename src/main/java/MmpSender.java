@@ -29,6 +29,8 @@ public class MmpSender extends Thread {
     private String nodeID;
     private int portNum;
     private String senderPrefix = "[SENDER]: ";
+    //TO-DO: Writing changes to local member list to log file
+
     public MmpSender(DatagramSocket socket, Map<String, String> memberList, int portNum,
                      String localIP, String nodeID, AtomicBoolean ackReceived) {
         this.socket = socket;
@@ -49,8 +51,7 @@ public class MmpSender extends Thread {
 
     public void sendPing(InetAddress address, int portNum) throws IOException{
         StringBuilder pingMsg = new StringBuilder();
-        System.out.println(this.senderPrefix + "Ping msg send to " + address.getHostName()
-                + " from " + this.localIP);
+        //System.out.println(this.senderPrefix + "Ping msg send to " + address.getHostName() + " from " + this.localIP);
         pingMsg.append(this.nodeID).append(",").append(NodeStatus.PING.name());
         sendPacket(pingMsg.toString(), address, portNum);
     }
@@ -87,10 +88,8 @@ public class MmpSender extends Thread {
     @Override
     public void run(){
         String[] monitorList = this.getMonitorList();
-        System.out.println(this.senderPrefix + "sending out ping msgs.");
-        System.out.println(isRunning);
         while(isRunning){
-            System.out.println(this.senderPrefix + "sending out ping msgs.");
+            //System.out.println(this.senderPrefix + "sending out ping msgs.");
             for(String monitor : monitorList){
                 try {
                     this.sendPing(InetAddress.getByName(monitor), this.portNum);

@@ -26,6 +26,7 @@ public class MmpReceiver extends Thread {
     private int portNum;
     private int timeOut = 1000;
     private String receiverPrefix = "[RECEIVER]: ";
+    //TO-DO: Writing changes to local member list to log file
 
     public MmpReceiver(DatagramSocket socket, Map<String, String> memberList, int portNum,
                        String localIP, String nodeID, AtomicBoolean ackReceived){
@@ -79,7 +80,6 @@ public class MmpReceiver extends Thread {
         }catch(SocketException e){
             e.printStackTrace();
         }
-        System.out.println(this.receiverPrefix + "receiving packets...");
         System.out.println(isRunning);
         while(this.isRunning) {
             System.out.println(this.receiverPrefix + "receiving packets...");

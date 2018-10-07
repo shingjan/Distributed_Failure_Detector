@@ -93,7 +93,7 @@ public class MmpServer {
         //command line
         while(this.isRunning){
             try {
-                System.out.println(this.serverPrefix + "Available cmds: status, decommission");
+                System.out.println(this.serverPrefix + "Available cmds: status, self, decommission");
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 String command = br.readLine();
                 if(command.equals("status")){
@@ -101,6 +101,8 @@ public class MmpServer {
                 }else if(command.equals("decommission")){
                     System.out.println(this.serverPrefix + "Decommissioning " + this.localIP);
                     this.isRunning = false;
+                }else if(command.equals("self")) {
+                    System.out.println(this.serverPrefix + localIP);
                 }else{
                     System.out.println(this.serverPrefix + "Wrong cmd, try again");
                 }
