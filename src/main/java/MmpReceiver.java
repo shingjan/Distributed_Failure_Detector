@@ -59,26 +59,26 @@ public class MmpReceiver extends Thread {
     }
 
     public void execMessage(DatagramPacket packet) throws IOException{
-        String msg = new String(packet.getData(), 0 , packet.getLength() + 1);
+        String msg = new String(packet.getData(), 0 , packet.getLength());
         System.out.println( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];
         System.out.println(this.receiverPrefix + msgType);
-        if(msgType.equals(NodeStatus.PING.name())){
+        if(msgType.substring(0,1).equals("P")){
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
             this.sendPacket(ack, packet.getAddress(), packet.getPort());
-        }else if(msgType.equals(NodeStatus.ACK.name())){
+        }else if(msgType.substring(0,1).equals("A")){
             ackReceived.set(true);
             synchronized (ackReceived) {
                 ackReceived.notify();
             }
-        }else if(msgType.equals(NodeStatus.JOINED.name())){
+        }else if(msgType.substring(0,1).equals("J")){
             String [] tmp = senderID.split(" ");
             this.memberList.put(tmp[0], tmp[1]);
             this.writeToLog(this.receiverPrefix+ tmp[0] + " is added to the local member list with" +
                     " a timestamp of " + tmp[1]);
-        }else if(msgType.equals(NodeStatus.FAILED.name())){
+        }else if(msgType.substring(0,1).equals("F")){
             if(this.memberList.containsKey(senderID)) {
                 this.writeToLog(this.receiverPrefix + senderID + " is leaving the mmp");
                 this.memberList.remove(senderID);
