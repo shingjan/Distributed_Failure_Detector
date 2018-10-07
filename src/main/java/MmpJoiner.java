@@ -87,7 +87,7 @@ public class MmpJoiner extends Thread {
             }
 
             outputWriter.flush();
-            String msg = joinMsg + " " + NodeStatus.JOINED;
+            String msg = joinMsg + "," + NodeStatus.JOINED;
             this.broadcastToAll(msg);
             try {
                 joinRequest.close();
