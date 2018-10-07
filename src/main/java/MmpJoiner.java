@@ -15,14 +15,14 @@ public class MmpJoiner extends Thread {
     private String joinerPrefix = "[JOINER]: ";
 
     public MmpJoiner(Map<String, String> memberList, DatagramSocket socket, int port) {
-        this.isRunning=new AtomicBoolean(false);
+        this.isRunning=new AtomicBoolean(true);
         this.port=port;
         this.memberList = memberList;
         this.socket = socket;
     }
 
     public void terminate() {
-        this.isRunning.set(true);
+        this.isRunning.set(false);
     }
 
     public void broadcastToAll(String msg){
@@ -55,7 +55,7 @@ public class MmpJoiner extends Thread {
             e.printStackTrace();
         }
 
-        while (!isRunning.get()) {
+        while (isRunning.get()) {
             Socket joinRequest = null;
             try {
                 joinRequest=tcp.accept();

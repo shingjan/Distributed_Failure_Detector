@@ -35,6 +35,7 @@ public class MmpReceiver extends Thread {
         this.localIP = localIP;
         this.nodeID = nodeID;
         this.ackReceived = ackReceived;
+        this.isRunning = true;
     }
 
     public void sendPacket(String msg, InetAddress address, int portNum) throws IOException{
