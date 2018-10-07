@@ -60,6 +60,7 @@ public class MmpReceiver extends Thread {
 
     public void execMessage(DatagramPacket packet) throws IOException{
         String msg = new String(packet.getData(), 0 ,packet.getLength());
+        System.out.println(packet.getLength());
         this.writeToLog( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
@@ -116,5 +117,10 @@ public class MmpReceiver extends Thread {
 
     public void terminate(){
         this.isRunning = false;
+        try {
+            this.logWriter.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

@@ -137,5 +137,10 @@ public class MmpSender extends Thread {
 
     public void terminate(){
         this.isRunning = false;
+        try {
+            this.logWriter.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }
