@@ -1,5 +1,3 @@
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 import java.io.*;
 import java.net.*;
 import java.util.Map;
@@ -60,11 +58,11 @@ public class MmpReceiver extends Thread {
 
     public void execMessage(DatagramPacket packet) throws IOException{
         String msg = new String(packet.getData(), 0 , packet.getLength());
-        System.out.println( this.receiverPrefix + "execute msg: " + msg);
+        this.writeToLog( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];
-        System.out.println(this.receiverPrefix + msgType);
+        this.writeToLog(this.receiverPrefix + msgType);
         if(msgType.substring(0,1).equals("P")){
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
             this.sendPacket(ack, packet.getAddress(), packet.getPort());
