@@ -32,13 +32,13 @@ repositories {
 task mmpServer(type: JavaExec) {
     main = "MmpServer"
     classpath = sourceSets.main.runtimeClasspath
-    //standardInput = System.in
+    standardInput = System.in
 }
 
 task mmpClient(type: JavaExec) {
     main = "MmpIntroducer"
     classpath = sourceSets.main.runtimeClasspath
-    //standardInput = System.in
+    standardInput = System.in
     //jvmArgs = ['-Xms2048m', '-Xmx2048m']
     //args 'grep -i "he"'
 }
