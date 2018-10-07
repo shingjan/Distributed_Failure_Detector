@@ -2,9 +2,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,6 +20,24 @@ public class MmpJoiner extends Thread {
 
     public void terminate() {
         this.isRunning.set(true);
+    }
+
+    public void broadcastToAll(String msg){
+        //For broadcase, it wouldn't require any ACK to be sent back
+        try {
+            for (String member : memberList.keySet()) {
+                this.sendPacket(msg, InetAddress.getByName(member), 4445);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void sendPacket(String msg, InetAddress address, int portNum) throws IOException{
+        byte[] buffer = msg.getBytes();
+        DatagramPacket packet
+                = new DatagramPacket(buffer, buffer.length, address, portNum);
+        //this.socket.send(packet);
     }
 
     @Override
@@ -47,18 +63,13 @@ public class MmpJoiner extends Thread {
             }
 
             Scanner inputReader = null;
-            try {
-                inputReader = new Scanner(new InputStreamReader(joinRequest.getInputStream()));
-                inputReader.useDelimiter("\n");
-            } catch (IOException e) {
-                System.err.println("[ERROR] Error creating input stream to introducer");
-                return;
-            }
             PrintWriter outputWriter = null;
             try {
+                inputReader = new Scanner(new InputStreamReader(joinRequest.getInputStream()));
                 outputWriter = new PrintWriter(new OutputStreamWriter(joinRequest.getOutputStream()));
+                inputReader.useDelimiter("\n");
             } catch (IOException e) {
-                System.err.println("[ERROR] Error creating input stream from socket");
+                System.err.println("Input/Output buffer not working properly");
                 return;
             }
 
@@ -67,6 +78,7 @@ public class MmpJoiner extends Thread {
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
             System.out.println("[JOINER THREAD] join requested by : " + senderID);
+            this.memberList.put(senderID, senderTimeStamp);
             for (String member : memberList.keySet()) {
                 outputWriter.println(member+" "+memberList.get(member));
             }
