@@ -11,11 +11,13 @@ public class MmpJoiner extends Thread {
     private final int port;
     private final AtomicBoolean isRunning;
     private Map<String, String> memberList;
+    private DatagramSocket socket;
 
-    public MmpJoiner(Map<String, String> memberList, int port) {
+    public MmpJoiner(Map<String, String> memberList, DatagramSocket socket, int port) {
         this.isRunning=new AtomicBoolean(false);
         this.port=port;
         this.memberList = memberList;
+        this.socket = socket;
     }
 
     public void terminate() {
@@ -37,7 +39,7 @@ public class MmpJoiner extends Thread {
         byte[] buffer = msg.getBytes();
         DatagramPacket packet
                 = new DatagramPacket(buffer, buffer.length, address, portNum);
-        //this.socket.send(packet);
+        this.socket.send(packet);
     }
 
     @Override
@@ -84,7 +86,8 @@ public class MmpJoiner extends Thread {
             }
 
             outputWriter.flush();
-
+            String msg = joinMsg + " " + NodeStatus.JOINED;
+            this.broadcastToAll(msg);
             try {
                 joinRequest.close();
             } catch (IOException e) {

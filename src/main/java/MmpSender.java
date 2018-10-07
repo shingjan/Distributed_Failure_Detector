@@ -28,6 +28,7 @@ public class MmpSender extends Thread {
     private String localIP;
     private String nodeID;
     private int portNum;
+    private String senderPrefix = "[SENDER]: ";
     public MmpSender(DatagramSocket socket, Map<String, String> memberList, int portNum,
                      String localIP, String nodeID, AtomicBoolean ackReceived) {
         this.socket = socket;
@@ -47,6 +48,8 @@ public class MmpSender extends Thread {
 
     public void sendPing(InetAddress address, int portNum) throws IOException{
         StringBuilder pingMsg = new StringBuilder();
+        System.out.println(this.senderPrefix + "Ping msg send to " + address.getHostName()
+                + " from " + this.localIP);
         pingMsg.append(this.nodeID).append(",").append(NodeStatus.PING.name());
         sendPacket(pingMsg.toString(), address, portNum);
     }
@@ -98,9 +101,9 @@ public class MmpSender extends Thread {
                     e.printStackTrace();
                 }
                 if (ackReceived.get()) {
-                    System.out.println("ACK from " + monitor + " is received");
+                    System.out.println(this.senderPrefix + "ACK from " + monitor + " is received");
                 }else{
-                    System.out.println("Failure of node " + monitor +" detected. Remove it from" +
+                    System.out.println(this.senderPrefix + "Failure of node " + monitor +" detected. Remove it from" +
                             "local member list" );
                     this.memberList.remove(monitor);
                 }

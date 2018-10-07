@@ -13,7 +13,7 @@ public class MmpIntroducer extends MmpServer {
     public void startIntroducer(){
         System.out.println("Introducer node started");
         this.memberList.put(this.localIP, String.valueOf(System.currentTimeMillis()));
-        MmpJoiner mmpJoiner = new MmpJoiner(this.memberList, this.portNum);
+        MmpJoiner mmpJoiner = new MmpJoiner(this.memberList, this.socket, this.portNum);
         mmpJoiner.setDaemon(true);
         mmpJoiner.start();
         this.launch();

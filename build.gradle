@@ -35,7 +35,7 @@ task mmpServer(type: JavaExec) {
     standardInput = System.in
 }
 
-task mmpClient(type: JavaExec) {
+task mmpIntro(type: JavaExec) {
     main = "MmpIntroducer"
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in

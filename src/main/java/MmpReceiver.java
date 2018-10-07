@@ -25,6 +25,7 @@ public class MmpReceiver extends Thread {
     private String nodeID;
     private int portNum;
     private int timeOut = 1000;
+    private String receiverPrefix = "[RECEIVER]: ";
 
     public MmpReceiver(DatagramSocket socket, Map<String, String> memberList, int portNum,
                        String localIP, String nodeID, AtomicBoolean ackReceived){
@@ -45,6 +46,7 @@ public class MmpReceiver extends Thread {
 
     public void execMessage(DatagramPacket packet) throws IOException{
         String msg = new String(packet.getData(), 0 ,packet.getLength());
+        System.out.println( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];
@@ -59,11 +61,11 @@ public class MmpReceiver extends Thread {
         }else if(msgType.equals(NodeStatus.JOINED.name())){
             String [] tmp = senderID.split(",");
             this.memberList.put(tmp[0], tmp[1]);
-            System.out.println(tmp[0] + " is added to the local member list with" +
+            System.out.println(this.receiverPrefix+ tmp[0] + " is added to the local member list with" +
                     " a timestamp of " + tmp[1]);
         }else if(msgType.equals(NodeStatus.FAILED.name())){
             if(this.memberList.containsKey(senderID)) {
-                System.out.println(senderID + " is leaving the mmp");
+                System.out.println(this.receiverPrefix + senderID + " is leaving the mmp");
                 this.memberList.remove(senderID);
             }
         }
@@ -82,7 +84,7 @@ public class MmpReceiver extends Thread {
                 this.socket.receive(packet);
                 this.execMessage(packet);
             }catch(SocketTimeoutException e){
-                System.out.println("No packet received in one timeout!");
+                System.out.println(this.receiverPrefix + "No packet received in one timeout!");
             }catch(IOException e){
                 e.printStackTrace();
             }
