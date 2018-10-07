@@ -41,6 +41,7 @@ public class MmpReceiver extends Thread {
         this.nodeID = nodeID;
         this.ackReceived = ackReceived;
         this.isRunning = true;
+        this.buffer = new byte[512];
         try {
             File file = new File(LOG_NAME);
             FileOutputStream fos = new FileOutputStream(file);

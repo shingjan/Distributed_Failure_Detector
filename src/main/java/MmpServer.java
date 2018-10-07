@@ -39,6 +39,7 @@ public class MmpServer {
         this.nodeStatus = NodeStatus.JOINED;
         this.nodeID = this.localIP+" "+System.currentTimeMillis();
         this.isRunning = true;
+        this.buffer = new byte[512];
     }
 
     public boolean joinMmp(){
