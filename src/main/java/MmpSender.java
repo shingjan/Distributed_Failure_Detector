@@ -1,4 +1,4 @@
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -29,6 +29,8 @@ public class MmpSender extends Thread {
     private String nodeID;
     private int portNum;
     private String senderPrefix = "[SENDER]: ";
+    private static final String LOG_NAME = "../sender.log";
+    private BufferedWriter logWriter;
     //TO-DO: Writing changes to local member list to log file
 
     public MmpSender(DatagramSocket socket, Map<String, String> memberList, int portNum,
@@ -39,7 +41,15 @@ public class MmpSender extends Thread {
         this.localIP = localIP;
         this.nodeID = nodeID;
         this.ackReceived = ackReceived;
+        this.ackReceived = ackReceived;
         this.isRunning = true;
+        try {
+            File file = new File(LOG_NAME);
+            FileOutputStream fos = new FileOutputStream(file);
+            this.logWriter = new BufferedWriter(new OutputStreamWriter(fos));
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }
     }
 
     public void sendPacket(String msg, InetAddress address, int portNum) throws IOException{
@@ -62,6 +72,14 @@ public class MmpSender extends Thread {
             for (String member : memberList.keySet()) {
                 this.sendPacket(msg, InetAddress.getByName(member), this.portNum);
             }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void writeToLog(String msg){
+        try {
+            this.logWriter.write(msg + "\n");
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -99,16 +117,15 @@ public class MmpSender extends Thread {
                     }
                     try {
                         synchronized (ackReceived) {
-                            ackReceived.wait(500);
+                            ackReceived.wait(1000);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (ackReceived.get()) {
-                        System.out.println(this.senderPrefix + "ACK from " + monitor + " is received");
+                        this.writeToLog(this.senderPrefix + "ACK from " + monitor + " is received");
                     } else {
-                        System.out.println(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from" +
-                                "local member list");
+                        this.writeToLog(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
                         this.memberList.remove(monitor);
                     }
                 }

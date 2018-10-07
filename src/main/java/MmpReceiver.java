@@ -1,6 +1,6 @@
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +28,8 @@ public class MmpReceiver extends Thread {
     private int portNum;
     private int timeOut = 1000;
     private String receiverPrefix = "[RECEIVER]: ";
+    private static final String LOG_NAME = "../receiver.log";
+    private BufferedWriter logWriter;
     //TO-DO: Writing changes to local member list to log file
 
     public MmpReceiver(DatagramSocket socket, Map<String, String> memberList, int portNum,
@@ -39,6 +41,13 @@ public class MmpReceiver extends Thread {
         this.nodeID = nodeID;
         this.ackReceived = ackReceived;
         this.isRunning = true;
+        try {
+            File file = new File(LOG_NAME);
+            FileOutputStream fos = new FileOutputStream(file);
+            this.logWriter = new BufferedWriter(new OutputStreamWriter(fos));
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }
     }
 
     public void sendPacket(String msg, InetAddress address, int portNum) throws IOException{
@@ -50,7 +59,7 @@ public class MmpReceiver extends Thread {
 
     public void execMessage(DatagramPacket packet) throws IOException{
         String msg = new String(packet.getData(), 0 ,packet.getLength());
-        System.out.println( this.receiverPrefix + "execute msg: " + msg);
+        this.writeToLog( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];
@@ -66,13 +75,21 @@ public class MmpReceiver extends Thread {
         }else if(msgType.equals(NodeStatus.JOINED.name())){
             String [] tmp = senderID.split(" ");
             this.memberList.put(tmp[0], tmp[1]);
-            System.out.println(this.receiverPrefix+ tmp[0] + " is added to the local member list with" +
+            this.writeToLog(this.receiverPrefix+ tmp[0] + " is added to the local member list with" +
                     " a timestamp of " + tmp[1]);
         }else if(msgType.equals(NodeStatus.FAILED.name())){
             if(this.memberList.containsKey(senderID)) {
-                System.out.println(this.receiverPrefix + senderID + " is leaving the mmp");
+                this.writeToLog(this.receiverPrefix + senderID + " is leaving the mmp");
                 this.memberList.remove(senderID);
             }
+        }
+    }
+
+    public void writeToLog(String msg){
+        try {
+            this.logWriter.write(msg + "\n");
+        }catch(IOException e){
+            e.printStackTrace();
         }
     }
 
@@ -83,14 +100,13 @@ public class MmpReceiver extends Thread {
         }catch(SocketException e){
             e.printStackTrace();
         }
-        System.out.println(isRunning);
         while(this.isRunning) {
             DatagramPacket packet = new DatagramPacket(this.buffer, this.buffer.length);
             try {
                 this.socket.receive(packet);
                 this.execMessage(packet);
             }catch(SocketTimeoutException e){
-                System.out.println(this.receiverPrefix + "No packet received in one timeout!");
+                this.writeToLog(this.receiverPrefix + "No packet received in one timeout!");
             }catch(IOException e){
                 e.printStackTrace();
             }
