@@ -1,3 +1,5 @@
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.Map;
@@ -52,6 +54,7 @@ public class MmpReceiver extends Thread {
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];
+        System.out.println(this.receiverPrefix + msgType);
         if(msgType.equals(NodeStatus.PING.name())){
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
             this.sendPacket(ack, packet.getAddress(), packet.getPort());
@@ -82,7 +85,6 @@ public class MmpReceiver extends Thread {
         }
         System.out.println(isRunning);
         while(this.isRunning) {
-            System.out.println(this.receiverPrefix + "receiving packets...");
             DatagramPacket packet = new DatagramPacket(this.buffer, this.buffer.length);
             try {
                 this.socket.receive(packet);

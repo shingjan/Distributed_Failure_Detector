@@ -90,25 +90,27 @@ public class MmpSender extends Thread {
         String[] monitorList = this.getMonitorList();
         while(isRunning){
             //System.out.println(this.senderPrefix + "sending out ping msgs.");
-            for(String monitor : monitorList){
-                try {
-                    this.sendPing(InetAddress.getByName(monitor), this.portNum);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                try {
-                    synchronized (ackReceived) {
-                        ackReceived.wait(500);
+            for(String monitor : monitorList ){
+                if(monitor != null && !monitor.equals(this.localIP)) {
+                    try {
+                        this.sendPing(InetAddress.getByName(monitor), this.portNum);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (ackReceived.get()) {
-                    System.out.println(this.senderPrefix + "ACK from " + monitor + " is received");
-                }else{
-                    System.out.println(this.senderPrefix + "Failure of node " + monitor +" detected. Remove it from" +
-                            "local member list" );
-                    this.memberList.remove(monitor);
+                    try {
+                        synchronized (ackReceived) {
+                            ackReceived.wait(500);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (ackReceived.get()) {
+                        System.out.println(this.senderPrefix + "ACK from " + monitor + " is received");
+                    } else {
+                        System.out.println(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from" +
+                                "local member list");
+                        this.memberList.remove(monitor);
+                    }
                 }
             }
             //dynamically change the monitor list after each loop
