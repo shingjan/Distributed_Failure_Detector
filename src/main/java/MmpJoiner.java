@@ -49,7 +49,7 @@ public class MmpJoiner extends Thread {
         ServerSocket tcp=null;
 
         try {
-            tcp=new ServerSocket(this.port);
+            tcp = new ServerSocket(this.port);
             tcp.setSoTimeout(100);
         } catch (IOException e) {
             e.printStackTrace();

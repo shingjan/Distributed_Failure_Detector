@@ -73,9 +73,13 @@ public class MmpReceiver extends Thread {
             }
         }else if(msgType.substring(0,1).equals("J")){
             String [] tmp = senderID.split(" ");
-            this.memberList.put(tmp[0], tmp[1]);
-            this.writeToLog(this.receiverPrefix+ tmp[0] + " is added to the local member list with" +
-                    " a timestamp of " + tmp[1]);
+            if(!this.memberList.containsKey(tmp[0])) {
+                this.memberList.put(tmp[0], tmp[1]);
+                this.writeToLog(this.receiverPrefix + tmp[0] + " is added to the local list with" +
+                        " a timestamp of " + tmp[1]);
+            }else{
+                this.writeToLog(this.receiverPrefix + tmp[0] + "is already in the local list");
+            }
         }else if(msgType.substring(0,1).equals("F")){
             if(this.memberList.containsKey(senderID)) {
                 this.writeToLog(this.receiverPrefix + senderID + " is leaving the mmp");
