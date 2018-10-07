@@ -51,9 +51,9 @@ public class MmpReceiver extends Thread {
     public void execMessage(DatagramPacket packet) throws IOException{
         String msg = new String(packet.getData(), 0 ,packet.getLength());
         System.out.println( this.receiverPrefix + "execute msg: " + msg);
-        String[] nodeInfo = msg.split(",")[0].split(" ");
+        String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
-        String msgType = msg.split(",")[1];
+        String msgType = nodeInfo[1];
         System.out.println(this.receiverPrefix + msgType);
         if(msgType.equals(NodeStatus.PING.name())){
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
@@ -64,7 +64,7 @@ public class MmpReceiver extends Thread {
                 ackReceived.notify();
             }
         }else if(msgType.equals(NodeStatus.JOINED.name())){
-            String [] tmp = senderID.split(",");
+            String [] tmp = senderID.split(" ");
             this.memberList.put(tmp[0], tmp[1]);
             System.out.println(this.receiverPrefix+ tmp[0] + " is added to the local member list with" +
                     " a timestamp of " + tmp[1]);
