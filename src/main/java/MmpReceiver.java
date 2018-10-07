@@ -61,7 +61,7 @@ public class MmpReceiver extends Thread {
     public void execMessage(DatagramPacket packet) throws IOException{
         String msg = new String(packet.getData(), 0 ,packet.getLength());
         System.out.println(packet.getLength());
-        this.writeToLog( this.receiverPrefix + "execute msg: " + msg);
+        System.out.println( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];

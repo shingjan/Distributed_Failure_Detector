@@ -54,6 +54,7 @@ public class MmpSender extends Thread {
 
     public void sendPacket(String msg, InetAddress address, int portNum) throws IOException{
         this.buffer = msg.getBytes();
+        System.out.println(this.buffer.length);
         DatagramPacket packet
                 = new DatagramPacket(buffer, buffer.length, address, portNum);
         this.socket.send(packet);
