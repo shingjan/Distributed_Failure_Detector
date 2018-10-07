@@ -82,12 +82,12 @@ public class MmpServer {
         MmpReceiver mmpReceiver = new MmpReceiver(this.socket, this.memberList, this.portNum,
                 this.localIP, this.nodeID, this.ackReceived);
         mmpReceiver.setDaemon(true);
-        mmpReceiver.run();
+        mmpReceiver.start();
         System.out.println("Receiver running in background");
         MmpSender mmpSender = new MmpSender(this.socket, this.memberList, this.portNum,
                 this.localIP, this.nodeID, this.ackReceived);
         mmpSender.setDaemon(true);
-        mmpSender.run();
+        mmpSender.start();
         System.out.println("Sender running in background");
         //command line
         while(this.isRunning){
