@@ -53,7 +53,7 @@ public class MmpReceiver extends Thread {
         System.out.println( this.receiverPrefix + "execute msg: " + msg);
         String[] nodeInfo = msg.split(",")[0].split(" ");
         String senderID = nodeInfo[0];
-        String msgType = nodeInfo[1];
+        String msgType = msg.split(",")[1];
         System.out.println(this.receiverPrefix + msgType);
         if(msgType.equals(NodeStatus.PING.name())){
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
