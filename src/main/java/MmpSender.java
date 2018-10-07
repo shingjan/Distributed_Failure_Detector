@@ -87,6 +87,7 @@ public class MmpSender extends Thread {
     public void run(){
         String[] monitorList = this.getMonitorList();
         while(isRunning){
+            System.out.println(this.senderPrefix + "sending out ping msgs.");
             for(String monitor : monitorList){
                 try {
                     this.sendPing(InetAddress.getByName(monitor), this.portNum);

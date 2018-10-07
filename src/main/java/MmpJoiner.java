@@ -12,6 +12,7 @@ public class MmpJoiner extends Thread {
     private final AtomicBoolean isRunning;
     private Map<String, String> memberList;
     private DatagramSocket socket;
+    private String joinerPrefix = "[JOINER]: ";
 
     public MmpJoiner(Map<String, String> memberList, DatagramSocket socket, int port) {
         this.isRunning=new AtomicBoolean(false);
@@ -44,7 +45,7 @@ public class MmpJoiner extends Thread {
 
     @Override
     public void run() {
-        System.out.println("mmpJoiner thread started");
+        System.out.println("MmpJoiner thread started");
         ServerSocket tcp=null;
 
         try {
@@ -79,7 +80,7 @@ public class MmpJoiner extends Thread {
             System.out.println(joinMsg);
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
-            System.out.println("[JOINER THREAD] join requested by : " + senderID);
+            System.out.println( this.joinerPrefix + "join requested by : " + senderID);
             this.memberList.put(senderID, senderTimeStamp);
             for (String member : memberList.keySet()) {
                 outputWriter.println(member+" "+memberList.get(member));

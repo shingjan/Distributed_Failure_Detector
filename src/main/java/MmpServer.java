@@ -28,6 +28,7 @@ public class MmpServer {
     protected int portNum;
     protected NodeStatus nodeStatus;
     protected AtomicBoolean ackReceived = new AtomicBoolean(false);
+    private String serverPrefix = "[SERVER]: ";
 
     public MmpServer(int portNum) throws SocketException {
         this.portNum = portNum;
@@ -45,10 +46,10 @@ public class MmpServer {
         try{
             introducer = new Socket(this.introducerIP, this.portNum);
         }catch(IOException e){
-            System.out.println("Cannot connect to Introducer. Joining not available.");
+            System.out.println(this.serverPrefix + "Cannot connect to Introducer. Joining not available.");
             return false;
         }
-        System.out.println("Introducer Connected. Getting up-to-date mmp list from it...");
+        System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
         PrintWriter toIntrocucer = null;
         BufferedReader fromIntroducer = null;
         try {
@@ -60,13 +61,13 @@ public class MmpServer {
             e.printStackTrace();
             return false;
         }
-        System.out.println("Input/Ouput Stream inited");
+        System.out.println(this.serverPrefix + "Input/Ouput Stream inited");
         String line = null;
         try {
             toIntrocucer.println(this.nodeID);
             toIntrocucer.flush();
             while ((line = fromIntroducer.readLine()) != null) {
-                System.out.println(line+"updated from introducer");
+                System.out.println(this.serverPrefix + line +" updated from introducer");
                 String[] tmp = line.split(" ");
                 this.memberList.put(tmp[0], tmp[1]);
             }
@@ -74,7 +75,7 @@ public class MmpServer {
             e.printStackTrace();
             return false;
         }
-        System.out.println("Member list updated from introducer!");
+        System.out.println(this.serverPrefix + "Member list updated from introducer!");
         return true;
     }
 
@@ -83,25 +84,25 @@ public class MmpServer {
                 this.localIP, this.nodeID, this.ackReceived);
         mmpReceiver.setDaemon(true);
         mmpReceiver.start();
-        System.out.println("Receiver running in background");
+        System.out.println(this.serverPrefix + "Receiver running in background");
         MmpSender mmpSender = new MmpSender(this.socket, this.memberList, this.portNum,
                 this.localIP, this.nodeID, this.ackReceived);
         mmpSender.setDaemon(true);
         mmpSender.start();
-        System.out.println("Sender running in background");
+        System.out.println(this.serverPrefix + "Sender running in background");
         //command line
         while(this.isRunning){
             try {
-                System.out.println("Available cmds: status, decommission");
+                System.out.println(this.serverPrefix + "Available cmds: status, decommission");
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 String command = br.readLine();
                 if(command.equals("status")){
                     this.printMemberList();
                 }else if(command.equals("decommission")){
-                    System.out.println("Decommissioning " + this.localIP);
+                    System.out.println(this.serverPrefix + "Decommissioning " + this.localIP);
                     this.isRunning = false;
                 }else{
-                    System.out.println("Wrong cmd, try again");
+                    System.out.println(this.serverPrefix + "Wrong cmd, try again");
                 }
             }catch(IOException e){
                 e.printStackTrace();
@@ -117,7 +118,7 @@ public class MmpServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("sender & receiver terminated. Decommission finished");
+        System.out.println(this.serverPrefix + "sender & receiver terminated. Decommission finished");
         this.socket.close();
     }
 
