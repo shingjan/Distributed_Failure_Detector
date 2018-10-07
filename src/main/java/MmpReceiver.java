@@ -78,6 +78,8 @@ public class MmpReceiver extends Thread {
         }catch(SocketException e){
             e.printStackTrace();
         }
+        System.out.println(this.receiverPrefix + "receiving packets...");
+        System.out.println(isRunning);
         while(this.isRunning) {
             System.out.println(this.receiverPrefix + "receiving packets...");
             DatagramPacket packet = new DatagramPacket(this.buffer, this.buffer.length);

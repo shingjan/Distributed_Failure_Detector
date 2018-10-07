@@ -96,7 +96,7 @@ public class MmpJoiner extends Thread {
             }
 
             memberList.put(senderID, senderTimeStamp);
-            System.out.println(senderID + " added to membership list");
+            System.out.println(this.joinerPrefix + senderID + " added to membership list");
         }
 
         try {

@@ -86,6 +86,8 @@ public class MmpSender extends Thread {
     @Override
     public void run(){
         String[] monitorList = this.getMonitorList();
+        System.out.println(this.senderPrefix + "sending out ping msgs.");
+        System.out.println(isRunning);
         while(isRunning){
             System.out.println(this.senderPrefix + "sending out ping msgs.");
             for(String monitor : monitorList){
