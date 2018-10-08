@@ -116,7 +116,7 @@ public class MmpSender extends Thread {
                     }
                     try {
                         synchronized (this.hasACK) {
-                            this.hasACK.wait(1000);
+                            this.hasACK.wait(500);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
