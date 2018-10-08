@@ -83,7 +83,7 @@ public class MmpReceiver extends Thread {
                 this.writeToLog(this.receiverPrefix + tmp[0] + "is already in the local list");
             }
         }else if(msgType.substring(0,1).equals("F")){
-            if(this.memberList.containsKey(senderID)) {
+            if(this.memberList.containsKey(senderID.split(" ")[0])) {
                 System.out.println(this.receiverPrefix + senderID + " is leaving the mmp");
                 this.writeToLog(this.receiverPrefix + senderID + " is leaving the mmp");
                 this.memberList.remove(senderID);
