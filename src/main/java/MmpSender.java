@@ -107,7 +107,7 @@ public class MmpSender extends Thread {
         while(isRunning){
             //System.out.println(this.senderPrefix + "sending out ping msgs.");
             for(String monitor : monitorList ){
-                this.hasACK.set(false);
+                hasACK.set(false);
                 if(monitor != null && !monitor.equals(this.localIP)) {
                     try {
                         this.sendPing(InetAddress.getByName(monitor), this.portNum);
@@ -115,8 +115,8 @@ public class MmpSender extends Thread {
                         e.printStackTrace();
                     }
                     try {
-                        synchronized (this.hasACK) {
-                            this.hasACK.wait(500);
+                        synchronized (hasACK) {
+                            hasACK.wait(500);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
