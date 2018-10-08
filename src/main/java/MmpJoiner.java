@@ -79,8 +79,10 @@ public class MmpJoiner extends Thread {
 
             String msg = joinMsg + "," + NodeStatus.JOINED;
             this.broadcastToAll(msg);
-            memberList.put(senderID, senderTimeStamp);
-            System.out.println(this.joinerPrefix + senderID + " added to membership list");
+            if(!memberList.containsKey(senderID)) {
+                memberList.put(senderID, senderTimeStamp);
+                System.out.println(this.joinerPrefix + senderID + " added to membership list");
+            }
         }
 
     }

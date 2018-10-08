@@ -50,13 +50,20 @@ public class MmpServer {
                     InetAddress.getByName(this.introducerIP), this.portNum);
             this.socket.send(firstMsg);
             System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
-            memberInfo = new DatagramPacket(this.buffer, this.buffer.length);
-            this.socket.receive(memberInfo);
         }catch(IOException e){
             System.out.println(this.serverPrefix + "Introducer cannot be connected. Abort");
         }
 
+        this.buffer = new byte[512];
+        try {
+            memberInfo = new DatagramPacket(this.buffer, this.buffer.length);
+            this.socket.receive(memberInfo);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
         String memberInfoStr = new String(memberInfo.getData(), 0, memberInfo.getLength());
+        System.out.println(memberInfoStr);
         String[] members = memberInfoStr.split("|");
         for (String member : members){
             if(!member.equals("|")) {
