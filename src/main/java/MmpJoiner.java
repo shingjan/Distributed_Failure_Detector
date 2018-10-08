@@ -68,6 +68,8 @@ public class MmpJoiner extends Thread {
             String joinMsg = new String(firstMsg.getData(), 0, firstMsg.getLength());
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
+            if(this.memberList.containsKey(senderID))
+                continue;
             System.out.println( this.joinerPrefix + "join requested by : " + senderID);
             this.memberList.put(senderID, senderTimeStamp);
             StringBuilder updatedList = new StringBuilder();
