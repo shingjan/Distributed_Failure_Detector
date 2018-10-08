@@ -49,12 +49,18 @@ public class MmpJoiner extends Thread {
     public void run() {
         System.out.println(this.joinerPrefix + "Joiner running in background");
         byte[] buffer = this.nodeID.getBytes();
-
+        try {
+            this.socket.setSoTimeout(100);
+        }catch(SocketException e){
+            e.printStackTrace();
+        }
 
         while (isRunning.get()) {
             DatagramPacket firstMsg = new DatagramPacket(buffer, buffer.length);
             try {
                 this.socket.receive(firstMsg);
+            }catch(SocketTimeoutException e){
+                continue;
             }catch(IOException e){
                 e.printStackTrace();
             }
