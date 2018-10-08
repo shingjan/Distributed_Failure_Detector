@@ -43,10 +43,10 @@ public class MmpServer {
     }
 
     public boolean joinMmp(){
-        this.buffer = this.nodeID.getBytes();
+        byte[] nodeInfo = this.nodeID.getBytes();
         DatagramPacket memberInfo = null;
         try {
-            DatagramPacket firstMsg = new DatagramPacket(this.buffer, this.buffer.length,
+            DatagramPacket firstMsg = new DatagramPacket(nodeInfo, nodeInfo.length,
                     InetAddress.getByName(this.introducerIP), this.portNum);
             this.socket.send(firstMsg);
             System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
@@ -54,9 +54,9 @@ public class MmpServer {
             System.out.println(this.serverPrefix + "Introducer cannot be connected. Abort");
         }
 
-        this.buffer = new byte[512];
+        byte[] memeberByte = new byte[512];
         try {
-            memberInfo = new DatagramPacket(this.buffer, this.buffer.length);
+            memberInfo = new DatagramPacket(memeberByte, memeberByte.length);
             this.socket.receive(memberInfo);
         }catch(IOException e){
             e.printStackTrace();

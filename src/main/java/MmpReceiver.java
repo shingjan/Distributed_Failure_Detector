@@ -79,8 +79,8 @@ public class MmpReceiver extends Thread {
                 this.writeToLog(this.receiverPrefix + tmp[0] + " is added to the local list with" +
                         " a timestamp of " + tmp[1]);
             }else{
-                System.out.println(this.receiverPrefix + tmp[0] + "is already in the local list");
-                this.writeToLog(this.receiverPrefix + tmp[0] + "is already in the local list");
+                System.out.println(this.receiverPrefix + tmp[0] + " is already in the local list");
+                this.writeToLog(this.receiverPrefix + tmp[0] + " is already in the local list");
             }
         }else if(msgType.substring(0,1).equals("F")){
             String [] tmp = senderID.split(" ");
