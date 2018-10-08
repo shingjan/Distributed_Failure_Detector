@@ -66,7 +66,7 @@ public class MmpJoiner extends Thread {
             this.memberList.put(senderID, senderTimeStamp);
             StringBuilder updatedList = new StringBuilder();
             for (String member : memberList.keySet()) {
-                updatedList.append(member+" "+memberList.get(member)).append("|");
+                updatedList.append(member+" "+memberList.get(member)).append(",");
             }
             byte[] memberByteArr = updatedList.toString().getBytes();
             DatagramPacket memberPacket = new DatagramPacket(memberByteArr, memberByteArr.length,
