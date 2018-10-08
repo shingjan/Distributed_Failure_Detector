@@ -8,7 +8,7 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MmpJoiner extends Thread {
-    private final int port;
+    private final int portNum;
     private final AtomicBoolean isRunning;
     private Map<String, String> memberList;
     private DatagramSocket socket;
@@ -17,7 +17,7 @@ public class MmpJoiner extends Thread {
 
     public MmpJoiner(Map<String, String> memberList, DatagramSocket socket, int port, String nodeID) {
         this.isRunning=new AtomicBoolean(true);
-        this.port=port;
+        this.portNum=port;
         this.memberList = memberList;
         this.socket = socket;
         this.nodeID = nodeID;
@@ -68,10 +68,10 @@ public class MmpJoiner extends Thread {
             String joinMsg = new String(firstMsg.getData(), 0, firstMsg.getLength());
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
-            if(this.memberList.containsKey(senderID))
+            if(this.memberList.containsKey(senderID)) {
                 continue;
+            }
             System.out.println( this.joinerPrefix + "join requested by : " + senderID);
-            this.memberList.put(senderID, senderTimeStamp);
             StringBuilder updatedList = new StringBuilder();
             for (String member : memberList.keySet()) {
                 updatedList.append(member+" "+memberList.get(member)).append(",");
