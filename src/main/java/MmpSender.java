@@ -127,7 +127,7 @@ public class MmpSender extends Thread {
                     } else {
                         System.out.println(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
                         this.writeToLog(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
-                        String failure = monitor + " " + System.currentTimeMillis() + "," + NodeStatus.FAILED.name();
+                        String failure = monitor + " " + System.currentTimeMillis() + "," + NodeStatus.FAILED;
                         this.broadcastToAll(failure);
                         this.memberList.remove(monitor);
                     }

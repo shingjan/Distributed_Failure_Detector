@@ -62,7 +62,6 @@ public class MmpReceiver extends Thread {
         String[] nodeInfo = msg.split(",");
         String senderID = nodeInfo[0];
         String msgType = nodeInfo[1];
-        this.writeToLog(this.receiverPrefix + msgType);
         if(msgType.substring(0,1).equals("P")){
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
             this.sendPacket(ack, packet.getAddress(), packet.getPort());
