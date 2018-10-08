@@ -60,7 +60,6 @@ public class MmpJoiner extends Thread {
             }
 
             String joinMsg = new String(firstMsg.getData(), 0, firstMsg.getLength());
-            System.out.println(joinMsg);
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
             System.out.println( this.joinerPrefix + "join requested by : " + senderID);
@@ -70,7 +69,8 @@ public class MmpJoiner extends Thread {
                 updatedList.append(member+" "+memberList.get(member)).append("|");
             }
             byte[] memberByteArr = updatedList.toString().getBytes();
-            DatagramPacket memberPacket = new DatagramPacket(memberByteArr, memberByteArr.length);
+            DatagramPacket memberPacket = new DatagramPacket(memberByteArr, memberByteArr.length,
+                    firstMsg.getAddress(), firstMsg.getPort());
             try{
                 this.socket.send(memberPacket);
             }catch(IOException e){

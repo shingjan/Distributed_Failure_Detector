@@ -59,9 +59,11 @@ public class MmpServer {
         String memberInfoStr = new String(memberInfo.getData(), 0, memberInfo.getLength());
         String[] members = memberInfoStr.split("|");
         for (String member : members){
-            System.out.println(this.serverPrefix + member +" updated from introducer");
-            String[] tmp = member.split(" ");
-            this.memberList.put(tmp[0], tmp[1]);
+            if(!member.equals("|")) {
+                System.out.println(this.serverPrefix + member + " updated from introducer");
+                String[] tmp = member.split(" ");
+                this.memberList.put(tmp[0], tmp[1]);
+            }
         }
 
         System.out.println(this.serverPrefix + "Member list updated from introducer!");
