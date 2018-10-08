@@ -27,7 +27,7 @@ public class MmpServer {
     protected String nodeID;
     protected int portNum;
     protected NodeStatus nodeStatus;
-    protected AtomicBoolean ackReceived = new AtomicBoolean(false);
+    protected AtomicBoolean hasACK = new AtomicBoolean(false);
     private String serverPrefix = "[SERVER]: ";
 
     public MmpServer(int portNum) throws SocketException {
@@ -43,7 +43,7 @@ public class MmpServer {
     }
 
     public boolean joinMmp(){
-        byte[] nodeInfo = this.nodeID.getBytes();
+        byte[] nodeInfo = new byte[28];
         DatagramPacket memberInfo = null;
         try {
             DatagramPacket firstMsg = new DatagramPacket(nodeInfo, nodeInfo.length,
@@ -54,7 +54,7 @@ public class MmpServer {
             System.out.println(this.serverPrefix + "Introducer cannot be connected. Abort");
         }
 
-        byte[] memeberByte = new byte[512];
+        byte[] memeberByte = new byte[256];
         try {
             memberInfo = new DatagramPacket(memeberByte, memeberByte.length);
             this.socket.receive(memberInfo);
@@ -77,12 +77,12 @@ public class MmpServer {
 
     public void launch(){
         MmpReceiver mmpReceiver = new MmpReceiver(this.socket, this.memberList, this.portNum,
-                this.localIP, this.nodeID, this.ackReceived);
+                this.localIP, this.nodeID, this.hasACK);
         mmpReceiver.setDaemon(true);
         mmpReceiver.start();
         System.out.println(this.serverPrefix + "Receiver running in background");
         MmpSender mmpSender = new MmpSender(this.socket, this.memberList, this.portNum,
-                this.localIP, this.nodeID, this.ackReceived);
+                this.localIP, this.nodeID, this.hasACK);
         mmpSender.setDaemon(true);
         mmpSender.start();
         System.out.println(this.serverPrefix + "Sender running in background");

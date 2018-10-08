@@ -68,10 +68,10 @@ public class MmpJoiner extends Thread {
             String joinMsg = new String(firstMsg.getData(), 0, firstMsg.getLength());
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
-            if(this.memberList.containsKey(senderID)) {
-                continue;
-            }
             System.out.println( this.joinerPrefix + "join requested by : " + senderID);
+            if(!this.memberList.containsKey(senderID)) {
+                this.memberList.put(senderID, senderTimeStamp);
+            }
             StringBuilder updatedList = new StringBuilder();
             for (String member : memberList.keySet()) {
                 updatedList.append(member+" "+memberList.get(member)).append(",");
@@ -87,10 +87,7 @@ public class MmpJoiner extends Thread {
 
             String msg = joinMsg + "," + NodeStatus.JOINED;
             this.broadcastToAll(msg);
-            if(!memberList.containsKey(senderID)) {
-                memberList.put(senderID, senderTimeStamp);
-                System.out.println(this.joinerPrefix + senderID + " added to membership list");
-            }
+            System.out.println(this.joinerPrefix + senderID + " added to membership list");
         }
 
     }

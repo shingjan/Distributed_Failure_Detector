@@ -7,7 +7,7 @@ public class MmpReceiver extends Thread {
     private DatagramSocket socket;
     private boolean isRunning;
     private byte[] buffer;
-    private AtomicBoolean ackReceived;
+    private AtomicBoolean hasACK;
     private static String[] membership = {
             "172.22.158.208",
             "172.22.154.209",
@@ -31,13 +31,13 @@ public class MmpReceiver extends Thread {
     //TO-DO: Writing changes to local member list to log file
 
     public MmpReceiver(DatagramSocket socket, Map<String, String> memberList, int portNum,
-                       String localIP, String nodeID, AtomicBoolean ackReceived){
+                       String localIP, String nodeID, AtomicBoolean hasACK){
         this.socket = socket;
         this.memberList = memberList;
         this.portNum = portNum;
         this.localIP = localIP;
         this.nodeID = nodeID;
-        this.ackReceived = ackReceived;
+        this.hasACK = hasACK;
         this.isRunning = true;
         this.buffer = new byte[512];
         try {
@@ -66,9 +66,9 @@ public class MmpReceiver extends Thread {
             String ack = this.nodeID + "," + NodeStatus.ACK.name();
             this.sendPacket(ack, packet.getAddress(), packet.getPort());
         }else if(msgType.substring(0,1).equals("A")){
-            ackReceived.set(true);
-            synchronized (ackReceived) {
-                ackReceived.notify();
+            hasACK.set(true);
+            synchronized (hasACK) {
+                hasACK.notify();
             }
         }else if(msgType.substring(0,1).equals("J")){
             String [] tmp = senderID.split(" ");

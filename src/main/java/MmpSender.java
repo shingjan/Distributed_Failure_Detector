@@ -11,7 +11,7 @@ public class MmpSender extends Thread {
     private DatagramSocket socket;
     private boolean isRunning;
     private byte[] buffer;
-    private AtomicBoolean ackReceived;
+    private AtomicBoolean hasACK;
     private static String[] membership = {
             "172.22.158.208",
             "172.22.154.209",
@@ -34,13 +34,13 @@ public class MmpSender extends Thread {
     //TO-DO: Writing changes to local member list to log file
 
     public MmpSender(DatagramSocket socket, Map<String, String> memberList, int portNum,
-                     String localIP, String nodeID, AtomicBoolean ackReceived) {
+                     String localIP, String nodeID, AtomicBoolean hasACK) {
         this.socket = socket;
         this.memberList = memberList;
         this.portNum = portNum;
         this.localIP = localIP;
         this.nodeID = nodeID;
-        this.ackReceived = ackReceived;
+        this.hasACK = hasACK;
         this.isRunning = true;
         try {
             File file = new File(LOG_NAME);
@@ -108,7 +108,7 @@ public class MmpSender extends Thread {
         while(isRunning){
             //System.out.println(this.senderPrefix + "sending out ping msgs.");
             for(String monitor : monitorList ){
-                ackReceived.set(false);
+                this.hasACK.set(false);
                 if(monitor != null && !monitor.equals(this.localIP)) {
                     try {
                         this.sendPing(InetAddress.getByName(monitor), this.portNum);
@@ -116,13 +116,13 @@ public class MmpSender extends Thread {
                         e.printStackTrace();
                     }
                     try {
-                        synchronized (ackReceived) {
-                            ackReceived.wait(1000);
+                        synchronized (this.hasACK) {
+                            this.hasACK.wait(1000);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (ackReceived.get()) {
+                    if (this.hasACK.get()) {
                         this.writeToLog(this.senderPrefix + "ACK from " + monitor + " is received");
                     } else {
                         System.out.println(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
