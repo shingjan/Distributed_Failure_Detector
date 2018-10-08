@@ -43,39 +43,27 @@ public class MmpServer {
     }
 
     public boolean joinMmp(){
-        Socket introducer = null;
-        try{
-            introducer = new Socket(this.introducerIP, this.portNum);
-        }catch(IOException e){
-            System.out.println(this.serverPrefix + "Cannot connect to Introducer. Joining not available.");
-            return false;
-        }
-        System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
-        PrintWriter toIntrocucer = null;
-        BufferedReader fromIntroducer = null;
+        this.buffer = this.nodeID.getBytes();
+        DatagramPacket memberInfo = null;
         try {
-            fromIntroducer = new BufferedReader(
-                    new InputStreamReader(introducer.getInputStream()));
-            toIntrocucer = new PrintWriter(
-                    new OutputStreamWriter(introducer.getOutputStream()));
-        }catch (IOException e){
-            e.printStackTrace();
-            return false;
-        }
-        System.out.println(this.serverPrefix + "Input/Ouput Stream inited");
-        String line = null;
-        try {
-            toIntrocucer.println(this.nodeID);
-            toIntrocucer.flush();
-            while ((line = fromIntroducer.readLine()) != null) {
-                System.out.println(this.serverPrefix + line +" updated from introducer");
-                String[] tmp = line.split(" ");
-                this.memberList.put(tmp[0], tmp[1]);
-            }
+            DatagramPacket firstMsg = new DatagramPacket(this.buffer, this.buffer.length,
+                    InetAddress.getByName(this.introducerIP), this.portNum);
+            this.socket.send(firstMsg);
+            System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
+            memberInfo = new DatagramPacket(this.buffer, this.buffer.length);
+            this.socket.receive(memberInfo);
         }catch(IOException e){
-            e.printStackTrace();
-            return false;
+            System.out.println(this.serverPrefix + "Introducer cannot be connected. Abort");
         }
+
+        String memberInfoStr = new String(memberInfo.getData(), 0, memberInfo.getLength());
+        String[] members = memberInfoStr.split("|");
+        for (String member : members){
+            System.out.println(this.serverPrefix + member +" updated from introducer");
+            String[] tmp = member.split(" ");
+            this.memberList.put(tmp[0], tmp[1]);
+        }
+
         System.out.println(this.serverPrefix + "Member list updated from introducer!");
         return true;
     }
