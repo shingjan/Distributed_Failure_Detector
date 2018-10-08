@@ -1,0 +1,1 @@
+rm ../receiver.log ../sender.log

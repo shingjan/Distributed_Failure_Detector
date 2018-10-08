@@ -69,7 +69,7 @@ public class MmpSender extends Thread {
         //For broadcase, it wouldn't require any ACK to be sent back
         try {
             for (String member : memberList.keySet()) {
-                this.sendPacket(msg, InetAddress.getByName(member), this.portNum);
+                this.sendPacket(msg, InetAddress.getByName(member), 4445);
             }
         }catch(IOException e){
             e.printStackTrace();
@@ -125,6 +125,7 @@ public class MmpSender extends Thread {
                     if (ackReceived.get()) {
                         this.writeToLog(this.senderPrefix + "ACK from " + monitor + " is received");
                     } else {
+                        System.out.println(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
                         this.writeToLog(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
                         String failure = monitor + " " + System.currentTimeMillis() + "," + NodeStatus.FAILED.name();
                         this.broadcastToAll(failure);
