@@ -28,7 +28,6 @@ public class MmpReceiver extends Thread {
     private String receiverPrefix = "[RECEIVER]: ";
     private static final String LOG_NAME = "../receiver.log";
     private BufferedWriter logWriter;
-    //TO-DO: Writing changes to local member list to log file
 
     public MmpReceiver(DatagramSocket socket, Map<String, String> memberList, int portNum,
                        String localIP, String nodeID, AtomicBoolean hasACK){

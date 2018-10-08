@@ -31,7 +31,6 @@ public class MmpSender extends Thread {
     private String senderPrefix = "[SENDER]: ";
     private static final String LOG_NAME = "../sender.log";
     private BufferedWriter logWriter;
-    //TO-DO: Writing changes to local member list to log file
 
     public MmpSender(DatagramSocket socket, Map<String, String> memberList, int portNum,
                      String localIP, String nodeID, AtomicBoolean hasACK) {
