@@ -41,7 +41,6 @@ public class MmpSender extends Thread {
         this.localIP = localIP;
         this.nodeID = nodeID;
         this.ackReceived = ackReceived;
-        this.ackReceived = ackReceived;
         this.isRunning = true;
         try {
             File file = new File(LOG_NAME);
@@ -127,6 +126,8 @@ public class MmpSender extends Thread {
                         this.writeToLog(this.senderPrefix + "ACK from " + monitor + " is received");
                     } else {
                         this.writeToLog(this.senderPrefix + "Failure of node " + monitor + " detected. Remove it from local member list");
+                        String failure = monitor + " " + System.currentTimeMillis() + "," + NodeStatus.FAILED.name();
+                        this.broadcastToAll(failure);
                         this.memberList.remove(monitor);
                     }
                 }
@@ -134,6 +135,9 @@ public class MmpSender extends Thread {
             //dynamically change the monitor list after each loop
             monitorList = this.getMonitorList();
         }
+        this.writeToLog(this.senderPrefix + "Voluntarily leaving the group...");
+        String leaving = this.nodeID + "," + NodeStatus.FAILED;
+        this.broadcastToAll(leaving);
     }
 
     public void terminate(){

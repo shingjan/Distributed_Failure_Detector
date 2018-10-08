@@ -10,7 +10,7 @@ public class MmpIntroducer extends MmpServer {
         super(portNum);
     }
 
-    public void startIntroducer(){
+    public void run(){
         System.out.println("Introducer node started");
         this.memberList.put(this.localIP, String.valueOf(System.currentTimeMillis()));
         MmpJoiner mmpJoiner = new MmpJoiner(this.memberList, this.socket, this.portNum);
@@ -28,7 +28,7 @@ public class MmpIntroducer extends MmpServer {
     public static void main(String[] args){
         try {
             MmpIntroducer mmpIntroducer = new MmpIntroducer(4445);
-            mmpIntroducer.startIntroducer();
+            mmpIntroducer.run();
         }catch(SocketException e){
             e.printStackTrace();
         }
