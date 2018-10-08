@@ -79,6 +79,7 @@ public class MmpJoiner extends Thread {
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
             System.out.println( this.joinerPrefix + senderID + " joining the group");
+            this.memberList.put(senderID, senderTimeStamp);
             for (String member : memberList.keySet()) {
                 output.println(member + " "+ memberList.get(member));
             }
@@ -90,7 +91,6 @@ public class MmpJoiner extends Thread {
             }
             String msg = joinMsg + "," + NodeStatus.JOINED;
             this.broadcastToAll(msg);
-            this.memberList.put(senderID, senderTimeStamp);
             System.out.println(this.joinerPrefix + senderID + " added to membership list");
         }
         try {

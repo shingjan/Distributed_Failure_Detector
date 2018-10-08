@@ -62,7 +62,6 @@ public class MmpServer {
             e.printStackTrace();
             return false;
         }
-        System.out.println(this.serverPrefix + "Input/Ouput Stream inited");
         String line = null;
         try {
             toIntrocucer.println(this.nodeID);
