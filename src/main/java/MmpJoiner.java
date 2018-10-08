@@ -48,47 +48,55 @@ public class MmpJoiner extends Thread {
     @Override
     public void run() {
         System.out.println(this.joinerPrefix + "Joiner running in background");
+        ServerSocket joiner = null;
         try {
-            this.socket.setSoTimeout(100);
-        }catch(SocketException e){
+            joiner = new ServerSocket(this.portNum);
+            joiner.setSoTimeout(500);
+        } catch (IOException e) {
             e.printStackTrace();
         }
-
         while (isRunning.get()) {
-            byte[] buffer = new byte[28];
-            DatagramPacket firstMsg = new DatagramPacket(buffer, buffer.length);
+            Socket join = null;
             try {
-                this.socket.receive(firstMsg);
-            }catch(SocketTimeoutException e){
+                join = joiner.accept();
+            } catch (SocketTimeoutException e) {
                 continue;
-            }catch(IOException e){
-                e.printStackTrace();
+            } catch (IOException e) {
+                System.out.println(this.joinerPrefix + "Cannot connect to joiner");
+            }
+            Scanner input = null;
+            PrintWriter output = null;
+            try {
+                input = new Scanner(new InputStreamReader(join.getInputStream()));
+                output = new PrintWriter(new OutputStreamWriter(join.getOutputStream()));
+                input.useDelimiter("\n");
+            } catch (IOException e) {
+                System.out.println(this.joinerPrefix + "Input/Output buffer not working properly");
+                return;
             }
 
-            String joinMsg = new String(firstMsg.getData(), 0, firstMsg.getLength());
+            String joinMsg = input.nextLine();
             String senderID = joinMsg.split(" ")[0];
             String senderTimeStamp = joinMsg.split(" ")[1];
-            System.out.println( this.joinerPrefix + "join requested by : " + senderID);
-            if(!this.memberList.containsKey(senderID)) {
-                this.memberList.put(senderID, senderTimeStamp);
-            }
-            StringBuilder updatedList = new StringBuilder();
+            System.out.println( this.joinerPrefix + senderID + " joining the group");
             for (String member : memberList.keySet()) {
-                updatedList.append(member+" "+memberList.get(member)).append(",");
+                output.println(member + " "+ memberList.get(member));
             }
-            byte[] memberByteArr = updatedList.toString().getBytes();
-            DatagramPacket memberPacket = new DatagramPacket(memberByteArr, memberByteArr.length,
-                    firstMsg.getAddress(), firstMsg.getPort());
-            try{
-                this.socket.send(memberPacket);
-            }catch(IOException e){
+            output.flush();
+            try {
+                join.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-
             String msg = joinMsg + "," + NodeStatus.JOINED;
             this.broadcastToAll(msg);
+            this.memberList.put(senderID, senderTimeStamp);
             System.out.println(this.joinerPrefix + senderID + " added to membership list");
         }
-
+        try {
+            joiner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

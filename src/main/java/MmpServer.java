@@ -43,34 +43,39 @@ public class MmpServer {
     }
 
     public boolean joinMmp(){
-        byte[] nodeInfo = new byte[28];
-        DatagramPacket memberInfo = null;
-        try {
-            DatagramPacket firstMsg = new DatagramPacket(nodeInfo, nodeInfo.length,
-                    InetAddress.getByName(this.introducerIP), this.portNum);
-            this.socket.send(firstMsg);
-            System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
+        Socket introducer = null;
+        try{
+            introducer = new Socket(this.introducerIP, this.portNum);
         }catch(IOException e){
-            System.out.println(this.serverPrefix + "Introducer cannot be connected. Abort");
+            System.out.println(this.serverPrefix + "Cannot connect to Introducer. Joining not available.");
+            return false;
         }
-
-        byte[] memeberByte = new byte[256];
+        System.out.println(this.serverPrefix + "Introducer Connected. Getting up-to-date mmp list from it...");
+        PrintWriter toIntrocucer = null;
+        BufferedReader fromIntroducer = null;
         try {
-            memberInfo = new DatagramPacket(memeberByte, memeberByte.length);
-            this.socket.receive(memberInfo);
-        }catch(IOException e){
+            fromIntroducer = new BufferedReader(
+                    new InputStreamReader(introducer.getInputStream()));
+            toIntrocucer = new PrintWriter(
+                    new OutputStreamWriter(introducer.getOutputStream()));
+        }catch (IOException e){
             e.printStackTrace();
+            return false;
         }
-
-        String memberInfoStr = new String(memberInfo.getData(), 0, memberInfo.getLength());
-        System.out.println(memberInfoStr);
-        String[] members = memberInfoStr.split(",");
-        for (String member : members){
-            System.out.println(this.serverPrefix + member + " updated from introducer");
-            String[] tmp = member.split(" ");
-            this.memberList.put(tmp[0], tmp[1]);
+        System.out.println(this.serverPrefix + "Input/Ouput Stream inited");
+        String line = null;
+        try {
+            toIntrocucer.println(this.nodeID);
+            toIntrocucer.flush();
+            while ((line = fromIntroducer.readLine()) != null) {
+                System.out.println(this.serverPrefix + line +" updated from introducer");
+                String[] tmp = line.split(" ");
+                this.memberList.put(tmp[0], tmp[1]);
+            }
+        }catch(IOException e) {
+            e.printStackTrace();
+            return false;
         }
-
         System.out.println(this.serverPrefix + "Member list updated from introducer!");
         return true;
     }
