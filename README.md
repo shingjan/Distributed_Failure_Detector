@@ -1,6 +1,6 @@
-# mp2-weilinz2-ys26
+# Distributed Failure Detector
 
-- Run Introducer first on node 1, 172.22.158.208, via:
+- Run Introducer first on master node, via:
 ~~~
 ./gradlew mmpIntro
 ~~~
